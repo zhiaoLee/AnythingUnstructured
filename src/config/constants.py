@@ -44,6 +44,8 @@ class MODEL_NAME:
 
     DocLayout_YOLO = 'doclayout_yolo'
 
+    PP_DocLayout = "pp_doclayout"
+
     LAYOUTLMv3 = 'layoutlmv3'
 
     YOLO_V8_MFD = 'yolo_v8_mfd'

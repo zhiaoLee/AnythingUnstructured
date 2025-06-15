@@ -141,6 +141,17 @@ class CustomPEKModel:
                 ),
                 device=self.device,
             )
+        elif self.layout_model_name == MODEL_NAME.PP_DocLayout:
+            self.layout_model = atom_model_manager.get_atom_model(
+                atom_model_name=AtomicModel.Layout,
+                layout_model_name=MODEL_NAME.PP_DocLayout,
+                pp_doclayout_weights=str(
+                    os.path.join(
+                        os.path.dirname(root_dir), self.configs['weights'][self.layout_model_name]
+                    )
+                ),
+                device=self.device,
+            )
         # 初始化ocr
         self.ocr_model = atom_model_manager.get_atom_model(
             atom_model_name=AtomicModel.OCR,

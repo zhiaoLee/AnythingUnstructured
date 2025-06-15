@@ -46,7 +46,8 @@ class BatchAnalyze:
             for image in images:
                 layout_res = self.model.layout_model(image, ignore_catids=[])
                 images_layout_res.append(layout_res)
-        elif self.model.layout_model_name == MODEL_NAME.DocLayout_YOLO:
+        elif self.model.layout_model_name == MODEL_NAME.DocLayout_YOLO or \
+                self.model.layout_model_name == MODEL_NAME.PP_DocLayout:
             # doclayout_yolo
             layout_images = []
             for image_index, image in enumerate(images):

@@ -5,6 +5,7 @@ from src.config.constants import MODEL_NAME
 from src.model.model_list import AtomicModel
 from src.model.sub_modules.language_detection.yolov11.YOLOv11 import YOLOv11LangDetModel
 from src.model.sub_modules.layout.doclayout_yolo.DocLayoutYOLO import DocLayoutYOLOModel
+from src.model.sub_modules.layout.pp_doclayout.PP_DocLayout import PPDocLayoutModel
 from src.model.sub_modules.mfd.yolov8.YOLOv8 import YOLOv8MFDModel
 from src.model.sub_modules.mfr.unimernet.Unimernet import UnimernetModel
 from src.model.sub_modules.ocr.paddleocr2pytorch.pytorch_paddle import PytorchPaddleOCR
@@ -88,6 +89,11 @@ def doclayout_yolo_model_init(weight, device='cpu'):
     model = DocLayoutYOLOModel(weight, device)
     return model
 
+def pp_doclayout_model_init(weight, device='cpu'):
+    if str(device).startswith('npu'):
+        device = torch.device(device)
+    model = PPDocLayoutModel(weight, device)
+    return model
 
 def langdetect_model_init(langdetect_model_weight, device='cpu'):
     if str(device).startswith('npu'):
@@ -162,6 +168,11 @@ def atom_model_init(model_name: str, **kwargs):
         elif kwargs.get('layout_model_name') == MODEL_NAME.DocLayout_YOLO:
             atom_model = doclayout_yolo_model_init(
                 kwargs.get('doclayout_yolo_weights'),
+                kwargs.get('device')
+            )
+        elif kwargs.get('layout_model_name') == MODEL_NAME.PP_DocLayout:
+            atom_model = pp_doclayout_model_init(
+                kwargs.get('pp_doclayout_weights'),
                 kwargs.get('device')
             )
         else:
