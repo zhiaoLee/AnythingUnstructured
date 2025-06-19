@@ -30,6 +30,8 @@ class ListLineTag:
     IS_LIST_END_LINE = 'is_list_end_line'
 
 
+#这段代码是一个用于预处理文档块（blocks）的函数，
+# 核心逻辑是根据块类型（text、title、interline_equation）对块进行分组，并重置文本块（text block）的边界框（bbox）。
 def __process_blocks(blocks):
     # 对所有block预处理
     # 1.通过title和interline_equation将block分组
@@ -66,6 +68,7 @@ def __process_blocks(blocks):
         result.append(current_group)
 
     return result
+
 
 
 def __is_list_or_index_block(block):
@@ -328,6 +331,8 @@ def __is_list_group(text_blocks_group):
     return True
 
 
+#这段代码是一个用于合并文档页面内文本块（Text Block）的函数，
+# 核心逻辑是在合并前判断块类型（列表块、目录块或普通文本块），并根据类型执行不同的合并策略
 def __para_merge_page(blocks):
     page_text_blocks_groups = __process_blocks(blocks)
     for text_blocks_group in page_text_blocks_groups:

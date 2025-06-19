@@ -35,7 +35,7 @@ class PipeResult:
             img_dir_or_bucket_prefix (str): The s3 bucket prefix or local file directory which used to store the figure
             drop_mode (str, optional): Drop strategy when some page which is corrupted or inappropriate. Defaults to DropMode.NONE.
             md_make_mode (str, optional): The content Type of Markdown be made. Defaults to MakeMode.MM_MD.
-
+                    NLP_MD,STANDARD_FORMAT
         Returns:
             str: return markdown content
         """

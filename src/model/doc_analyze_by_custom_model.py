@@ -164,7 +164,7 @@ def doc_analyze(
         logger.info(f'Batch {index + 1}/{len(batch_images)}: {processed_images_count} pages/{len(images_with_extra_info)} pages')
 
         ##一系列识别
-        result = may_batch_image_analyze(batch_image, ocr, show_log,layout_model, formula_enable, table_enable)
+        result = may_batch_image_analyze(batch_image, ocr, show_log, layout_model, formula_enable, table_enable)
         results.extend(result)
 
     model_json = []
@@ -177,6 +177,7 @@ def doc_analyze(
             page_height = 0
             page_width = 0
 
+        #result:  {'category_id': 1, 'poly': [189, 1246, 1458, 1246, 1458, 1319, 189, 1319], 'score': 0.791}
         page_info = {'page_no': index, 'width': page_width, 'height': page_height}
         page_dict = {'layout_dets': result, 'page_info': page_info}
         model_json.append(page_dict)

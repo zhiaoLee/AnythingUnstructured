@@ -1,3 +1,5 @@
+import random
+
 import cv2
 import fitz
 from src.config.constants import CROSS_PAGE
@@ -438,6 +440,8 @@ def draw_detection_boxes(img, detections, output_path=None, color=(0, 255, 0), t
     for det in detections:
         x1, y1, x2, y2 = det['bbox']
         class_name = str(det['class'])
+        random.seed(det['class'])
+        color = (random.choices(range(1,255))[0],random.choices(range(1,255))[0],random.choices(range(1,255))[0])
 
         # 绘制矩形框
         cv2.rectangle(newimg, (int(x1), int(y1)), (int(x2), int(y2)), color, thickness)

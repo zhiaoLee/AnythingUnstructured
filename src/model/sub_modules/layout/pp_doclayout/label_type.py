@@ -18,6 +18,6 @@ PP_DocLayout_plus_L = {
     "seal": 2,
     "chart": 3,
     "formula_number": 9,
-    "aside_text": 1,
+    "aside_text": 2,
     "reference_content": 1
  }

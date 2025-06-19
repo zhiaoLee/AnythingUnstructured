@@ -72,7 +72,10 @@ if __name__ == "__main__":
     device = "cuda"
     layout = PPDocLayoutModel(weight=weight, device=device)
 
-    pdf_file_name = r"D:\CCKS2025\code\AnythingUnstructured\demo\pdfs\0c626c7f-9d1e-4137-87ca-29453764f654.pdf"
+
+
+    pdf_file_name = r"D:\CCKS2025\code\AnythingUnstructured\demo\pdfs\3bca9365-4ca1-403b-84ee-edb3154e494f.pdf"
+    basename = os.path.basename(pdf_file_name).rsplit(".",-1)[0]
     reader1 = FileBasedDataReader("")
     pdf_bytes = reader1.read(pdf_file_name)  # read the pdf content
     raw_fitz = fitz.open('pdf', pdf_bytes)
@@ -92,5 +95,7 @@ if __name__ == "__main__":
                 'bbox': [poly[0], poly[1], poly[2], poly[-1]],
                 'class': lay["category_id"]
             })
-        output_path = os.path.join(r"D:\CCKS2025\code\AnythingUnstructured\output\layout", f"lay_out_{index}.jpg")
-        draw_detection_boxes(img, detections, output_path=output_path, color=(0, 255, 0), thickness=2, font_scale=0.7)
+        output_path = os.path.join("D:\CCKS2025\code\AnythingUnstructured\output\layout", basename)
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+        draw_detection_boxes(img, detections, output_path=os.path.join(output_path, f"{index}.jpg"), color=(0, 255, 0), thickness=2, font_scale=0.7)
