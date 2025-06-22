@@ -15,8 +15,8 @@ def pdf2md(pdf_file_name, name_without_extension):
 
     # prepare env
     # 设置输出的图片和Markdown文档的路径
-    local_image_dir = os.path.join(__dir__, "output_0616_1", name_without_extension, "images")
-    local_md_dir = os.path.join(__dir__, "output_0616_1", name_without_extension)
+    local_image_dir = os.path.join(__dir__, "output_0622_2", name_without_extension, "images")
+    local_md_dir = os.path.join(__dir__, "output_0622_2", name_without_extension)
     image_dir = str(os.path.basename(local_image_dir))
     os.makedirs(local_image_dir, exist_ok=True)
 
@@ -84,5 +84,5 @@ if __name__ == "__main__":
         data.append([file_id, md_content])
     df = pd.DataFrame(data, columns=["file_id", "answer"])
     # 保存为 CSV 文件，文件名为 'example.csv'
-    df.to_csv('result/output_20250616_1.csv')
+    df.to_csv('result/output_20250622_2.csv')
     print(df)
