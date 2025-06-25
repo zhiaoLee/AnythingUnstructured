@@ -1040,7 +1040,7 @@ def pdf_parse_union(
                 logger.info(f'llm aided title time: {round(time.time() - llm_aided_title_start_time, 2)}')
 
     import json
-    from src.post_proc.title_hierarchy_correction import aided_title
+    from src.post_proc.vllm_title_aided import vllm_aided_title
     with open(os.path.join(os.path.dirname(imageWriter._parent_dir), "pdf_info_dict.json"), "w", encoding="utf-8") as f:
         json.dump(
             pdf_info_dict,
@@ -1049,7 +1049,10 @@ def pdf_parse_union(
             indent=4,  # 缩进4个空格，提升可读性
             separators=(",", ": ")  # 自定义分隔符（默认是(",", ":")）
         )
-    # aided_title(pdf_info_dict, dataset, imageWriter._parent_dir)
+    try:
+        vllm_aided_title(pdf_info_dict, dataset)
+    except Exception as e:
+        logger.error(f"Error vllm aided title: {e}")
 
 
     """dict转list"""
