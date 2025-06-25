@@ -1,5 +1,5 @@
 import os.path
-
+from loguru import logger
 import cv2
 from doclayout_yolo import YOLOv10
 from tqdm import tqdm
@@ -11,6 +11,7 @@ class DocLayoutYOLOModel(object):
         self.device = device
 
     def predict(self, image):
+        logger.info("layout: DocLayoutYOLO")
         layout_res = []
         doclayout_yolo_res = self.model.predict(
             image,
@@ -34,6 +35,7 @@ class DocLayoutYOLOModel(object):
         return layout_res
 
     def batch_predict(self, images: list, batch_size: int) -> list:
+        logger.info("layout: DocLayoutYOLO")
         images_layout_res = []
         # for index in range(0, len(images), batch_size):
         for index in tqdm(range(0, len(images), batch_size), desc="Layout Predict"):

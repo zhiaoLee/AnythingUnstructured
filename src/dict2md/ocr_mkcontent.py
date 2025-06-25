@@ -112,14 +112,21 @@ def ocr_mk_markdown_with_para_core_v2(paras_of_layout,
                                 if span['type'] == ContentType.Table:
                                     # if processed by table model
                                     if span.get('html', ''):
-                                        from bs4 import BeautifulSoup
-                                        from markdownify import markdownify as md
+                                        # from bs4 import BeautifulSoup
+                                        # from markdownify import markdownify as md
+                                        from src.utils.tool import convert_html_to_markdown
                                         html = span['html']
-                                        html_clean = re.sub(r'^<!DOCTYPE html>\s*', '', html)
-                                        html_clean = re.sub(r'^\s+', '', html_clean)
-                                        soup = BeautifulSoup(html_clean, "html.parser")
-                                        body_content = soup.body.decode_contents()
-                                        table_md = md(body_content)
+                                        table_md = convert_html_to_markdown(html)
+                                        # html_clean = re.sub(r'^<!DOCTYPE html>\s*', '', html)
+                                        # html_clean = re.sub(r'^\s+', '', html_clean)
+                                        # soup = BeautifulSoup(html_clean, "html.parser")
+                                        # body_content = soup.body.decode_contents()
+                                        # table_md = md(body_content)
+                                        # 添加以下代码降10分
+                                        # try:
+                                        #     table_md = re.sub(r'^\|(\s*\|\s*)*\n', '', table_md, count=1)
+                                        # except:
+                                        #     print("删除首行空行错误")
                                         para_text += f"{table_md}"
                                     elif span.get('image_path', ''):
                                         para_text += f"![]({img_buket_path}/{span['image_path']})"

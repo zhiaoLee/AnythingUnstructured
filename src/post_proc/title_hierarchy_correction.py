@@ -17,7 +17,8 @@ def aided_title(pdf_info_dict, dataset: Dataset, imgpath):
         blocks = page["para_blocks"]
         for block in blocks:
             if block["type"] == "title":
-                levels.append(block["level"])
+                if "level" in block.keys():
+                    levels.append(block["level"])
                 origin_title_list.append(block)
                 title_text = merge_para_with_text(block)
                 title_texts.append(title_text)
@@ -42,7 +43,7 @@ def aided_title(pdf_info_dict, dataset: Dataset, imgpath):
     for origin_title_block in origin_title_list:
         lines = origin_title_block["lines"]
         page_num = origin_title_block["page_num"]
-        level = origin_title_block["level"]
+        #level = origin_title_block["level"]
         bbox = origin_title_block["bbox"]
 
         index = int(page_num.split("_")[-1])
@@ -59,14 +60,12 @@ def aided_title(pdf_info_dict, dataset: Dataset, imgpath):
         )
 
 
-
-
 if __name__ == '__main__':
     import json
     from src.data.data_reader_writer import FileBasedDataReader
     from src.data.dataset import PymuDocDataset
 
-    pdf_file_name = "/Users/yaoyao/code/MinerU/demo/pdfs/demo1.pdf"
+    pdf_file_name = r"D:\CCKS2025\code\AnythingUnstructured\demo\pdfs\0ef9db04-86f2-4319-b08e-dcb5385b1232.pdf"
     reader1 = FileBasedDataReader("")
     pdf_bytes = reader1.read(pdf_file_name)  # read the pdf content
     # proc
@@ -74,6 +73,6 @@ if __name__ == '__main__':
     ds = PymuDocDataset(pdf_bytes)
 
     # 加载 JSON 文件
-    with open("/Users/yaoyao/code/MinerU/demo/pdf_info_dict.json", "r", encoding="utf-8") as f:
+    with open(r"D:\CCKS2025\code\AnythingUnstructured\demo\output\0ef9db04-86f2-4319-b08e-dcb5385b1232\pdf_info_dict.json", "r", encoding="utf-8") as f:
         pdf_info_dict = json.load(f)
-    aided_title(pdf_info_dict, ds, "/Users/yaoyao/code/MinerU/demo/output/demo1/images/title/")
+    aided_title(pdf_info_dict, ds, r"D:\CCKS2025\code\AnythingUnstructured\demo\output\0ef9db04-86f2-4319-b08e-dcb5385b1232\images\title")

@@ -1,5 +1,5 @@
 import os.path
-
+from loguru import logger
 import cv2
 from paddleocr import LayoutDetection
 from tqdm import tqdm
@@ -12,6 +12,7 @@ class PPDocLayoutModel(object):
         self.device = device
 
     def predict(self, image):
+        logger.info("layout: PPDocLayoutModel")
         layout_res = []
         doclayout_yolo_res = self.model.predict(
             image,
@@ -35,6 +36,7 @@ class PPDocLayoutModel(object):
         return layout_res
 
     def batch_predict(self, images: list, batch_size: int) -> list:
+        logger.info("layout: PPDocLayoutModel")
         images_layout_res = []
         # for index in range(0, len(images), batch_size):
         for index in tqdm(range(0, len(images), batch_size), desc="Layout Predict"):
@@ -74,7 +76,7 @@ if __name__ == "__main__":
 
 
 
-    pdf_file_name = r"D:\CCKS2025\code\AnythingUnstructured\demo\pdfs\3bca9365-4ca1-403b-84ee-edb3154e494f.pdf"
+    pdf_file_name = r"D:\CCKS2025\code\AnythingUnstructured\demo\pdfs\0ef9db04-86f2-4319-b08e-dcb5385b1232.pdf"
     basename = os.path.basename(pdf_file_name).rsplit(".",-1)[0]
     reader1 = FileBasedDataReader("")
     pdf_bytes = reader1.read(pdf_file_name)  # read the pdf content

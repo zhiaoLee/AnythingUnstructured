@@ -7,7 +7,7 @@
     "layoutreader-model-dir": "D:\\CCKS2025\\code\\AnythingUnstructured\\weights\\layoutreader",
     "device-mode":"cuda",
     "layout-config": {
-        "model": "pp_doclayout"
+        "model": "doclayout_yolo"
     },
     "formula-config": {
         "mfd_model": "yolo_v8_mfd",
