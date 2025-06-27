@@ -1050,7 +1050,7 @@ def pdf_parse_union(
             separators=(",", ": ")  # 自定义分隔符（默认是(",", ":")）
         )
     try:
-        vllm_aided_title(pdf_info_dict, dataset)
+        vllm_aided_title(pdf_info_dict, dataset, imageWriter._parent_dir)
     except Exception as e:
         logger.error(f"Error vllm aided title: {e}")
 

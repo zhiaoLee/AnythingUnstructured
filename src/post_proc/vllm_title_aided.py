@@ -1,5 +1,8 @@
 # Copyright (c) Opendatalab. All rights reserved.
 import json
+import os.path
+import time
+
 from loguru import logger
 from src.dict2md.ocr_mkcontent import merge_para_with_text
 from openai import OpenAI
@@ -12,11 +15,10 @@ def get_prompt():
     title_optimize_prompt = f"""输入的内容是一篇文档中所有标题组成的图片，请给每行标题确认对应的层级，使结果符合正常文档的层次结构，
     注意：
     1、为每个标题元素添加适当的层次结构
-    2、行高较大的标题一般是更高级别的标题
+    2、行高较大或字体越浓的标题一般是更高级别的标题
     3、标题从前至后的层级必须是连续的，不能跳过层级
     4、标题层级最多为4级，不要添加过多的层级
     5、优化后的标题只保留代表该标题的层级的整数，不要保留其他信息
-    6、字典中可能包含被误当成标题的正文，你可以通过将其层级标记为 0 来排除它们    
     IMPORTANT: 
     请直接返回优化过的由标题层级组成的字典，格式为{{行号:标题层级}}，如下：
     {{0:1,1:2,2:2,3:3}}
@@ -34,12 +36,12 @@ def pad_with_white(img, delta_h):
     bottom_pad = delta_h - top_pad
     return cv2.copyMakeBorder(
         img,
-        top=top_pad, bottom=bottom_pad, left=20, right=0,
+        top=top_pad, bottom=bottom_pad, left=10, right=0,
         borderType=cv2.BORDER_CONSTANT,
         value=(255, 255, 255)
     )
 
-def vllm_aided_title(pdf_info_dict, ds):
+def vllm_aided_title(pdf_info_dict, ds, out_path=None):
     client = OpenAI(
         api_key="sk-zqatabasduftncuukvbrjgmkinkinxjzpagidisgjefsuzmf",
         base_url="https://api.siliconflow.cn/v1",
@@ -95,24 +97,23 @@ def vllm_aided_title(pdf_info_dict, ds):
             imgs.append(bk_img)
             imgs_first_width.append(int(bk["bbox"][0]*w_radio))
             h, w, _ = bk_img.shape
-            max_width = max_width if max_width > w else w
-            max_higth += h + 10
+            max_width = max_width if max_width > w + int(bk["bbox"][0]*w_radio) else w + int(bk["bbox"][0]*w_radio)
+            max_higth += h + 30
 
-    all_img = np.full((max_higth+200, max_width+500, 3), (255, 255, 255), dtype=np.uint8)
+    all_img = np.full((max_higth+200, max_width+400, 3), (255, 255, 255), dtype=np.uint8)
 
-    cur_height = 50
+    cur_height = 40
     for index in range(len(imgs)):
         img = imgs[index]
         first_w = imgs_first_width[index]
         h1, w1, c1 = img.shape
         all_img[cur_height:cur_height + h1, first_w:first_w + w1] = img
-        cur_height += h1 + 10
+        cur_height += h1 + 30
 
+    import re
     import base64
-    cv2.imwrite("test.jpg", all_img)
-    # cv2.waitKey()
-
-    with open("test.jpg", 'rb') as f:
+    cv2.imwrite(os.path.join(out_path, "title.jpg"), all_img)
+    with open(os.path.join(out_path, "title.jpg"), 'rb') as f:
         img_base64 = base64.b64encode(f.read()).decode()
 
     # import base64
@@ -139,14 +140,45 @@ def vllm_aided_title(pdf_info_dict, ds):
                          {"type": "text", "text": title_optimize_prompt},
                          {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{img_base64}"}},
                      ]}],
-                temperature=0.7,
+                temperature=0.1,
             )
             logger.info(f"Title completion: {completion.choices[0].message.content}")
-            clean_dict_str = completion.choices[0].message.content.strip('`\n').replace('python\n', '')
-            dict_completion = ast.literal_eval(clean_dict_str)
-            # logger.info(f"len(dict_completion): {len(dict_completion)}, len(title_dict): {len(title_dict)}")
+            completion_content = completion.choices[0].message.content
+            clean_dict_str = completion_content.strip('`\n').replace('python\n', '').replace('json\n', '').replace('，',',').replace('：', ':')
 
-            if len(dict_completion) == len(origin_title_list):
+            try:
+                dict_completion = ast.literal_eval(clean_dict_str)
+            except Exception as e:
+                logger.error(f"ast.literal_eval Error: {e}")
+                pattern = r'(\{.*?\})'  # 匹配完整的 {} 结构，包括嵌套内容
+                match = re.search(pattern, clean_dict_str, re.DOTALL)  # re.DOTALL 允许匹配换行符
+                if match:
+                    json_str = match.group(1)
+                    try:
+                        try:
+                            dict_completion = ast.literal_eval(json_str)
+                        except:
+                            key_value_pairs = json_str.strip('{}').split(',')
+                            # 2. 初始化字典
+                            dict_completion = {}
+
+                            # 3. 解析每个键值对
+                            for pair in key_value_pairs:
+                                # 去除键值对中的空格
+                                pair = pair.strip()
+                                # 分割键和值（按第一个冒号分割）
+                                key_str, value_str = pair.split(':', 1)
+                                # 转换为整数
+                                key = int(key_str)
+                                value = int(value_str)
+                                # 添加到字典
+                                dict_completion[key] = value
+                                dict_completion[key] = value
+                    except json.JSONDecodeError:
+                        print("非合法 JSON 格式")
+            print("提取的字典:", dict_completion)
+            print("类型:", type(dict_completion))
+            if dict_completion and len(dict_completion) == len(origin_title_list):
                 for i, origin_title_block in enumerate(origin_title_list):
                     try:
                         origin_title_block["level"] = int(dict_completion[str(i)])
@@ -168,7 +200,7 @@ if __name__ == '__main__':
     from src.data.data_reader_writer import FileBasedDataReader
     from src.data.dataset import PymuDocDataset
 
-    pdf_file_name = r"D:\CCKS2025\code\AnythingUnstructured\demo\pdfs\0ef9db04-86f2-4319-b08e-dcb5385b1232.pdf"
+    pdf_file_name = r"D:\CCKS2025\code\AnythingUnstructured\demo\pdfs\03ab5de7-e011-435a-a7f9-9d8502f8ce25.pdf"
     reader1 = FileBasedDataReader("")
     pdf_bytes = reader1.read(pdf_file_name)  # read the pdf content
     # proc
@@ -176,6 +208,6 @@ if __name__ == '__main__':
     ds = PymuDocDataset(pdf_bytes)
 
     # 加载 JSON 文件
-    with open(r"D:\CCKS2025\code\AnythingUnstructured\demo\output\0ef9db04-86f2-4319-b08e-dcb5385b1232\pdf_info_dict.json", "r", encoding="utf-8") as f:
+    with open(os.path.join(pdf_file_name.rsplit(".")[0].replace("pdfs","output"), "pdf_info_dict.json"), "r", encoding="utf-8") as f:
         pdf_info_dict = json.load(f)
-    vllm_aided_title(pdf_info_dict, ds)
+    vllm_aided_title(pdf_info_dict, ds, os.path.join(pdf_file_name.rsplit(".")[0].replace("pdfs","output")))
