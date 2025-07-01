@@ -61,6 +61,7 @@ def ocr_mk_markdown_with_para_core_v2(paras_of_layout,
         para_type = para_block['type']
         if para_type in [BlockType.Text, BlockType.List, BlockType.Index]:
             para_text = merge_para_with_text(para_block)
+            para_text = para_text.replace("#","\\#")
         elif para_type == BlockType.Title:
             title_level = get_title_level(para_block)
             para_text = f'{"#" * title_level} {merge_para_with_text(para_block)}'

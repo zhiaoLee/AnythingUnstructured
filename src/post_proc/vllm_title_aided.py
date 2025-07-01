@@ -10,9 +10,9 @@ import ast
 import cv2
 import numpy as np
 
-def get_prompt():
+def get_prompt(num):
 
-    title_optimize_prompt = f"""输入的内容是一篇文档中所有标题组成的图片，请给每行标题确认对应的层级，使结果符合正常文档的层次结构，
+    title_optimize_prompt = f"""输入的内容是一篇文档中所有标题组成的图片，共{num}行，请给每行标题确认对应的层级，使结果符合正常文档的层次结构，
     注意：
     1、为每个标题元素添加适当的层次结构
     2、行高较大或字体越浓的标题一般是更高级别的标题
@@ -22,7 +22,7 @@ def get_prompt():
     IMPORTANT: 
     请直接返回优化过的由标题层级组成的字典，格式为{{行号:标题层级}}，如下：
     {{0:1,1:2,2:2,3:3}}
-    不需要对字典格式化，不需要返回任何其他信息。
+    字典的长度必须为{num},不需要对字典格式化，不需要返回任何其他信息。
     Corrected title list:
     """
     return title_optimize_prompt
@@ -97,17 +97,17 @@ def vllm_aided_title(pdf_info_dict, ds, out_path=None):
             imgs.append(bk_img)
             imgs_first_width.append(int(bk["bbox"][0]*w_radio))
             h, w, _ = bk_img.shape
-            max_width = max_width if max_width > w + int(bk["bbox"][0]*w_radio) else w + int(bk["bbox"][0]*w_radio)
+            max_width = max_width if max_width > w+int(bk["bbox"][0]*w_radio) else w+int(bk["bbox"][0]*w_radio)
             max_higth += h + 30
 
-    all_img = np.full((max_higth+200, max_width+400, 3), (255, 255, 255), dtype=np.uint8)
+    all_img = np.full((max_higth+200, max_width+200, 3), (255, 255, 255), dtype=np.uint8)
 
     cur_height = 40
     for index in range(len(imgs)):
         img = imgs[index]
         first_w = imgs_first_width[index]
         h1, w1, c1 = img.shape
-        all_img[cur_height:cur_height + h1, first_w:first_w + w1] = img
+        all_img[cur_height:cur_height + h1, first_w: first_w+w1] = img
         cur_height += h1 + 30
 
     import re
@@ -124,7 +124,7 @@ def vllm_aided_title(pdf_info_dict, ds, out_path=None):
 
     # logger.info(f"Title list: {title_dict}")
 
-    title_optimize_prompt = get_prompt()
+    title_optimize_prompt = get_prompt(len(imgs))
 
     retry_count = 0
     max_retries = 3
