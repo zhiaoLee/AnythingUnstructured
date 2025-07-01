@@ -60,7 +60,7 @@ def vllm_aided_title(pdf_info_dict, ds, out_path=None):
                     title_dict[page_num] = [block]
 
     imgs = []
-    imgs_first_width = []
+    #imgs_first_width = []
     max_width = 0
     max_higth = 0
     for page_num, block in title_dict.items():
@@ -95,9 +95,9 @@ def vllm_aided_title(pdf_info_dict, ds, out_path=None):
                     bk_img = np.hstack((img1_padded, img2_padded))
 
             imgs.append(bk_img)
-            imgs_first_width.append(int(bk["bbox"][0]*w_radio))
+            #imgs_first_width.append(int(bk["bbox"][0]*w_radio))
             h, w, _ = bk_img.shape
-            max_width = max_width if max_width > w+int(bk["bbox"][0]*w_radio) else w+int(bk["bbox"][0]*w_radio)
+            max_width = max_width if max_width > w else w
             max_higth += h + 30
 
     all_img = np.full((max_higth+200, max_width+200, 3), (255, 255, 255), dtype=np.uint8)
@@ -105,9 +105,9 @@ def vllm_aided_title(pdf_info_dict, ds, out_path=None):
     cur_height = 40
     for index in range(len(imgs)):
         img = imgs[index]
-        first_w = imgs_first_width[index]
+        #first_w = imgs_first_width[index]
         h1, w1, c1 = img.shape
-        all_img[cur_height:cur_height + h1, first_w: first_w+w1] = img
+        all_img[cur_height:cur_height + h1, 50: 50+w1] = img
         cur_height += h1 + 30
 
     import re
@@ -200,7 +200,7 @@ if __name__ == '__main__':
     from src.data.data_reader_writer import FileBasedDataReader
     from src.data.dataset import PymuDocDataset
 
-    pdf_file_name = r"D:\CCKS2025\code\AnythingUnstructured\demo\pdfs\03ab5de7-e011-435a-a7f9-9d8502f8ce25.pdf"
+    pdf_file_name = r"D:\CCKS2025\code\AnythingUnstructured\demo\pdfs\772e98a9-b55d-4ae3-ae05-b2b3de84cf5d.pdf"
     reader1 = FileBasedDataReader("")
     pdf_bytes = reader1.read(pdf_file_name)  # read the pdf content
     # proc
