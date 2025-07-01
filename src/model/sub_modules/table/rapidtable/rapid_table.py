@@ -1,4 +1,5 @@
 import os
+import time
 from pathlib import Path
 import cv2
 import numpy as np
@@ -41,12 +42,15 @@ class RapidTableModel(object):
 
     def predict(self, image):
         bgr_image = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
+        cv2.imwrite(f"{time.time()}.jpg",bgr_image)
 
         # First check the overall image aspect ratio (height/width)
         img_height, img_width = bgr_image.shape[:2]
+        # 判断图像是 “竖屏”（portrait）还是 “横屏”（landscape）
         img_aspect_ratio = img_height / img_width if img_width > 0 else 1.0
         img_is_portrait = img_aspect_ratio > 1.2
 
+        # 处理竖屏
         if img_is_portrait:
 
             det_res = self.ocr_engine.ocr(bgr_image, rec=False)[0]
