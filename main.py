@@ -7,7 +7,7 @@ from src.model.doc_analyze_by_custom_model import doc_analyze
 from src.config.enums import SupportedPdfParseMethod
 
 
-def pdf2md(pdf_file_name, name_without_extension):
+def pdf2md(pdf_file_name, name_without_extension, out_dirname):
     # args
     __dir__ = os.path.dirname(os.path.abspath(__file__))
     # pdf_file_name = os.path.join(__dir__, "pdfs", "demo1.pdf")  # replace with the real pdf path
@@ -15,8 +15,8 @@ def pdf2md(pdf_file_name, name_without_extension):
 
     # prepare env
     # 设置输出的图片和Markdown文档的路径
-    local_image_dir = os.path.join(__dir__, "output_0625_1", name_without_extension, "images")
-    local_md_dir = os.path.join(__dir__, "output_0625_1", name_without_extension)
+    local_image_dir = os.path.join(__dir__, out_dirname, name_without_extension, "images")
+    local_md_dir = os.path.join(__dir__, out_dirname, name_without_extension)
     image_dir = str(os.path.basename(local_image_dir))
     os.makedirs(local_image_dir, exist_ok=True)
 
@@ -76,13 +76,14 @@ if __name__ == "__main__":
 
     data = []
     path = r"D:\CCKS2025\data\dataset_A"
+    out_dirname = "output_20250702_1"
     for i, name in enumerate(os.listdir(path)):
         print(f"第{i+1}张, 名字是{name}......")
         file_id = name.rsplit(".", 1)[0]
         pdf_path = os.path.join(path, name)
-        md_content = pdf2md(pdf_path, file_id)
+        md_content = pdf2md(pdf_path, file_id, out_dirname=out_dirname)
         data.append([file_id, md_content])
     df = pd.DataFrame(data, columns=["file_id", "answer"])
     # 保存为 CSV 文件，文件名为 'example.csv'
-    df.to_csv('result/output_20250625_2.csv')
+    df.to_csv(f'result/{out_dirname}.csv')
     print(df)

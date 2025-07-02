@@ -9,7 +9,7 @@ from rapid_table import RapidTable, RapidTableInput
 from rapid_table.main import ModelType
 
 from src.libs.config_reader import get_device
-
+from rapidocr import RapidOCR
 
 class RapidTableModel(object):
     def __init__(self, ocr_engine, table_sub_model_name='slanet_plus'):
@@ -22,7 +22,9 @@ class RapidTableModel(object):
             else:
                 root_dir = Path(__file__).absolute().parent.parent.parent.parent.parent
                 slanet_plus_model_path = os.path.join(root_dir, 'resources', 'slanet_plus', 'slanet-plus.onnx')
-                input_args = RapidTableInput(model_type=table_sub_model_name, model_path=slanet_plus_model_path)
+                input_args = RapidTableInput(model_type=table_sub_model_name,
+                                             model_dir_or_path=slanet_plus_model_path,
+                                             engine_cfg={"use_cuda": True, "gpu_id": 1})
         else:
             raise ValueError(f"Invalid table_sub_model_name: {table_sub_model_name}. It must be one of {sub_model_list}")
 
@@ -37,12 +39,12 @@ class RapidTableModel(object):
         #     self.ocr_engine = RapidOCR()
 
         # self.ocr_model_name = "PaddleOCR"
-        self.ocr_engine = ocr_engine
+        self.ocr_engine = RapidOCR()
 
 
     def predict(self, image):
         bgr_image = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
-        cv2.imwrite(f"{time.time()}.jpg",bgr_image)
+        #cv2.imwrite(f"{time.time()}.jpg",bgr_image)
 
         # First check the overall image aspect ratio (height/width)
         img_height, img_width = bgr_image.shape[:2]
@@ -53,13 +55,16 @@ class RapidTableModel(object):
         # 处理竖屏
         if img_is_portrait:
 
-            det_res = self.ocr_engine.ocr(bgr_image, rec=False)[0]
+            det_res = self.ocr_engine(bgr_image, use_rec=False)
+            #det_res = self.ocr_engine.ocr(bgr_image, rec=False)[0]
             # Check if table is rotated by analyzing text box aspect ratios
             is_rotated = False
             if det_res:
                 vertical_count = 0
 
-                for box_ocr_res in det_res:
+                det_res_box = det_res.boxes
+                for box_ocr_res in det_res_box:
+
                     p1, p2, p3, p4 = box_ocr_res
 
                     # Calculate width and height
@@ -76,7 +81,7 @@ class RapidTableModel(object):
 
                 # If we have more vertical text boxes than horizontal ones,
                 # and vertical ones are significant, table might be rotated
-                if vertical_count >= len(det_res) * 0.3:
+                if vertical_count >= len(det_res_box) * 0.3:
                     is_rotated = True
 
                 # logger.debug(f"Text orientation analysis: vertical={vertical_count}, det_res={len(det_res)}, rotated={is_rotated}")
@@ -88,13 +93,15 @@ class RapidTableModel(object):
                 bgr_image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
         # Continue with OCR on potentially rotated image
-        ocr_result = self.ocr_engine.ocr(bgr_image)[0]
+        ocr_result = self.ocr_engine(bgr_image, use_rec=True)
+        #ocr_result = self.ocr_engine.ocr(bgr_image)[0]
         if ocr_result:
-            ocr_result = [[item[0], item[1][0], item[1][1]] for item in ocr_result if
-                      len(item) == 2 and isinstance(item[1], tuple)]
+            # ocr_result = [[item[0], item[1][0], item[1][1]] for item in ocr_result if
+            #           len(item) == 2 and isinstance(item[1], tuple)]
+
+            ocr_result = [ocr_result.boxes, ocr_result.txts, ocr_result.scores]
         else:
             ocr_result = None
-
 
         if ocr_result:
             table_results = self.table_model(np.asarray(image), ocr_result)

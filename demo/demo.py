@@ -8,7 +8,7 @@ from src.config.enums import SupportedPdfParseMethod
 
 # args
 __dir__ = os.path.dirname(os.path.abspath(__file__))
-pdf_file_name = os.path.join(__dir__, "pdfs", "0c626c7f-9d1e-4137-87ca-29453764f654.pdf")  # replace with the real pdf path
+pdf_file_name = os.path.join(__dir__, "pdfs", "772e98a9-b55d-4ae3-ae05-b2b3de84cf5d.pdf")  # replace with the real pdf path
 name_without_extension = os.path.basename(pdf_file_name).split('.')[0]
 
 # prepare env

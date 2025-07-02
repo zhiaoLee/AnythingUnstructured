@@ -75,11 +75,11 @@ if __name__ == "__main__":
     from src.data.utils import fitz_doc_to_image
     from src.libs.draw_bbox import draw_detection_boxes
 
-    weight = r"weights\\PDF-Extract-Kit-1___0/models\\Layout/YOLO/doclayout_yolo_docstructbench_imgsz1280_2501.pt"
+    weight = r"D:\CCKS2025\code\AnythingUnstructured\weights\PDF-Extract-Kit-1___0\models\Layout\YOLO\doclayout_yolo_docstructbench_imgsz1280_2501.pt"
     device = "cuda"
     layout = DocLayoutYOLOModel(weight=weight, device=device)
 
-    pdf_file_name = r"demo\pdfs\0c626c7f-9d1e-4137-87ca-29453764f654.pdf"
+    pdf_file_name = r"D:\CCKS2025\code\AnythingUnstructured\demo\pdfs\772e98a9-b55d-4ae3-ae05-b2b3de84cf5d.pdf"
     reader1 = FileBasedDataReader("")
     pdf_bytes = reader1.read(pdf_file_name)  # read the pdf content
     raw_fitz = fitz.open('pdf', pdf_bytes)
@@ -99,5 +99,5 @@ if __name__ == "__main__":
                 'bbox': [poly[0], poly[1], poly[2], poly[-1]],
                 'class': lay["category_id"]
             })
-        output_path = os.path.join(r"D:\CCKS2025\code\MinerU\Out\layout", f"lay_out_{index}.jpg")
+        output_path = os.path.join(r"D:\CCKS2025\code\AnythingUnstructured\demo\output\772e98a9-b55d-4ae3-ae05-b2b3de84cf5d\layout", f"lay_out_{index}.jpg")
         draw_detection_boxes(img, detections, output_path=output_path, color=(0, 255, 0), thickness=2, font_scale=0.7)

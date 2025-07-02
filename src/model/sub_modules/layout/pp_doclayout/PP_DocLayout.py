@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
 
 
-    pdf_file_name = r"D:\CCKS2025\code\AnythingUnstructured\demo\pdfs\0ef9db04-86f2-4319-b08e-dcb5385b1232.pdf"
+    pdf_file_name = r"D:\CCKS2025\code\AnythingUnstructured\demo\pdfs\772e98a9-b55d-4ae3-ae05-b2b3de84cf5d.pdf"
     basename = os.path.basename(pdf_file_name).rsplit(".",-1)[0]
     reader1 = FileBasedDataReader("")
     pdf_bytes = reader1.read(pdf_file_name)  # read the pdf content
@@ -97,7 +97,7 @@ if __name__ == "__main__":
                 'bbox': [poly[0], poly[1], poly[2], poly[-1]],
                 'class': lay["category_id"]
             })
-        output_path = os.path.join("D:\CCKS2025\code\AnythingUnstructured\output\layout", basename)
+        output_path = os.path.join(r"D:\CCKS2025\code\AnythingUnstructured\demo\output\772e98a9-b55d-4ae3-ae05-b2b3de84cf5d\layout", basename)
         if not os.path.exists(output_path):
             os.makedirs(output_path)
         draw_detection_boxes(img, detections, output_path=os.path.join(output_path, f"{index}.jpg"), color=(0, 255, 0), thickness=2, font_scale=0.7)
