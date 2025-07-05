@@ -9,6 +9,13 @@ from openai import OpenAI
 import ast
 import cv2
 import numpy as np
+from modelscope import Qwen2_5_VLForConditionalGeneration, AutoProcessor
+from qwen_vl_utils import process_vision_info
+
+model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+        r"D:\CCKS2025\weights\model", torch_dtype="auto", device_map="auto"
+    )
+processor = AutoProcessor.from_pretrained(r"D:\CCKS2025\weights\model")
 
 def get_prompt(num):
 
@@ -42,10 +49,11 @@ def pad_with_white(img, delta_h):
     )
 
 def vllm_aided_title(pdf_info_dict, ds, out_path=None):
-    client = OpenAI(
-        api_key="anything_rag",
-        base_url="http://124.88.174.116:31434/v1/",
-    )
+    # model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+    #     r"D:\CCKS2025\weights\model", torch_dtype="auto", device_map="auto"
+    # )
+    # processor = AutoProcessor.from_pretrained(r"D:\CCKS2025\weights\model")
+
     title_dict = {}
     origin_title_list = []
     i = 0
@@ -132,18 +140,47 @@ def vllm_aided_title(pdf_info_dict, ds, out_path=None):
 
     while retry_count < max_retries:
         try:
-            completion = client.chat.completions.create(
-                model="/root/epfs/model/qwen-2.5-VL-32B",
-                messages=[
-                    {'role': 'user',
-                     'content': [
-                         {"type": "text", "text": title_optimize_prompt},
-                         {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{img_base64}"}},
-                     ]}],
-                temperature=0.1,
+            # completion = client.chat.completions.create(
+            #     model="Qwen/Qwen2.5-VL-32B-Instruct",
+            #     messages=[
+            #         {'role': 'user',
+            #          'content': [
+            #              {"type": "text", "text": title_optimize_prompt},
+            #              {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{img_base64}"}},
+            #          ]}],
+            #     temperature=0.1,
+            # )
+            messages = [
+                {'role': 'user',
+                 'content': [
+                     {"type": "text", "text": title_optimize_prompt},
+                     {"type": "image", "image_url": f"{os.path.join(out_path, "title.jpg")}"},
+                 ]}]
+
+            text = processor.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
             )
-            logger.info(f"Title completion: {completion.choices[0].message.content}")
-            completion_content = completion.choices[0].message.content
+            image_inputs, video_inputs = process_vision_info(messages)
+            inputs = processor(
+                text=[text],
+                images=image_inputs,
+                videos=video_inputs,
+                padding=True,
+                return_tensors="pt",
+            )
+            inputs = inputs.to("cuda")
+
+            # Inference: Generation of the output
+            generated_ids = model.generate(**inputs, max_new_tokens=128)
+            generated_ids_trimmed = [
+                out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+            ]
+            output_text = processor.batch_decode(
+                generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+            )
+
+            logger.info(f"Title completion: {output_text[0]}")
+            completion_content = output_text[0]
             clean_dict_str = completion_content.strip('`\n').replace('python\n', '').replace('json\n', '').replace('，',',').replace('：', ':')
 
             try:

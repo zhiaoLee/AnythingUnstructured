@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     data = []
     path = r"D:\CCKS2025\data\dataset_A"
-    out_dirname = "output_20250702_1"
+    out_dirname = "output_250703_1"
     for i, name in enumerate(os.listdir(path)):
         print(f"第{i+1}张, 名字是{name}......")
         file_id = name.rsplit(".", 1)[0]
