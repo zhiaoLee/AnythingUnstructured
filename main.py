@@ -75,7 +75,7 @@ if __name__ == "__main__":
     import pandas as pd
 
     data = []
-    path = r"D:\CCKS2025\data\dataset_A"
+    path = r"./dataset_A"
     out_dirname = "output_250703_1"
     for i, name in enumerate(os.listdir(path)):
         print(f"第{i+1}张, 名字是{name}......")
