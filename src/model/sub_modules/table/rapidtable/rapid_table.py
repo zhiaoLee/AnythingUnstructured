@@ -9,7 +9,7 @@ from rapid_table import RapidTable, RapidTableInput
 from rapid_table.main import ModelType
 
 from src.libs.config_reader import get_device
-
+from src.post_proc.vllm_table import encode_image, ocr_page_with_nanonets_s
 
 class RapidTableModel(object):
     def __init__(self, ocr_engine, table_sub_model_name='slanet_plus'):
@@ -42,7 +42,7 @@ class RapidTableModel(object):
 
     def predict(self, image):
         bgr_image = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
-        #cv2.imwrite(f"{time.time()}.jpg",bgr_image)
+        cv2.imwrite("temp.jpg",bgr_image)
 
         # First check the overall image aspect ratio (height/width)
         img_height, img_width = bgr_image.shape[:2]
@@ -95,9 +95,17 @@ class RapidTableModel(object):
         else:
             ocr_result = None
 
-
         if ocr_result:
             table_results = self.table_model(np.asarray(image), ocr_result)
+            # try:
+            #     img_base64 = encode_image("temp.jpg")
+            #     html_code = ocr_page_with_nanonets_s(img_base64).replace('\n','').replace(' ','')
+            #     if not html_code.strip().endswith('</html>') and not html_code.strip().endswith('</table>'):
+            #         logger.error("Nanonets-OCR-s Error!!!  <table> not in html_code")
+            #         html_code = table_results.pred_html
+            #     #print(html_code)
+            # except Exception as e:
+            #     logger.error(f"Nanonets-OCR-s Error!!! {e}")
             html_code = table_results.pred_html
             table_cell_bboxes = table_results.cell_bboxes
             logic_points = table_results.logic_points

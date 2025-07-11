@@ -51,7 +51,7 @@ def pdf2md(pdf_file_name, name_without_extension, out_dirname):
 
     ### get model inference result
     ### 获取模型推理结果
-    model_inference_result = infer_result.get_infer_res()
+    # model_inference_result = infer_result.get_infer_res()
 
     ### draw layout result on each page
     ### 在每页上绘制Layout模型处理的结果
@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     data = []
     path = r"D:\CCKS2025\data\dataset_A"
-    out_dirname = "output_250703_1"
+    out_dirname = "output_250711_1"
     for i, name in enumerate(os.listdir(path)):
         print(f"第{i+1}张, 名字是{name}......")
         file_id = name.rsplit(".", 1)[0]

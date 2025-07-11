@@ -16,7 +16,7 @@
     },
     "table-config": {
         "model": "rapid_table",
-        "sub_model": "slanet_plus",
+        "sub_model": "unitable",
         "enable": true,
         "max_time": 400
     },

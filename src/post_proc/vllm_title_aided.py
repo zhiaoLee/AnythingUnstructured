@@ -43,8 +43,8 @@ def pad_with_white(img, delta_h):
 
 def vllm_aided_title(pdf_info_dict, ds, out_path=None):
     client = OpenAI(
-        api_key="anything_rag",
-        base_url="http://124.88.174.116:31434/v1/",
+        api_key="sk-zqatabasduftncuukvbrjgmkinkinxjzpagidisgjefsuzmf",
+        base_url="https://api.siliconflow.cn/v1",
     )
     title_dict = {}
     origin_title_list = []
@@ -133,7 +133,7 @@ def vllm_aided_title(pdf_info_dict, ds, out_path=None):
     while retry_count < max_retries:
         try:
             completion = client.chat.completions.create(
-                model="/root/epfs/model/qwen-2.5-VL-32B",
+                model="Qwen/Qwen2.5-VL-32B-Instruct",
                 messages=[
                     {'role': 'user',
                      'content': [
